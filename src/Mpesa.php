@@ -518,7 +518,7 @@ class Mpesa
      * @param $timestamp | Timestamp
      * @return mixed|string
      */
-    public static function STKPushQuery($environment, $checkoutRequestID, $businessShortCode, $password, $timestamp){
+    public static function STKPushQuery($checkoutRequestID, $businessShortCode, $BusinessShortCode, $LipaNaMpesaPasskey){
         
         try {
             $environment = $_SERVER['MPESA_ENV'];
@@ -536,6 +536,8 @@ class Mpesa
             return json_encode(["Message"=>"invalid application status"]);
         }
 
+        $timestamp = '20' . date("ymdhis");
+        $password = base64_encode($BusinessShortCode . $LipaNaMpesaPasskey . $timestamp);
 
         $curl = curl_init();
         curl_setopt($curl, CURLOPT_URL, $url);
