@@ -11,7 +11,7 @@ This package seeks to help php developers implement the various Mpesa APIs witho
  `MPESA_CONSUMER_KEY= "consumer key"` <br>
  `MPESA_CONSUMER_SECRET="consumer secret"`<br>
  `MPESA_BUSINESS_SHORTCODE=" enter business shortcode eg  174379"`<br>
- `MPESA_PASSKEY="enter lipa na mpesa passkey eg bfb279f9aa9bdbcf158e97dd71a467cd2e0c893059b10f78e6b72ada1ed2c919"`<br>
+ `LIPA_NA_MPESA_PASSKEY="enter lipa na mpesa passkey eg bfb279f9aa9bdbcf158e97dd71a467cd2e0c893059b10f78e6b72ada1ed2c919"`<br>
 
   _Remember to edit the consumer_key and consumer_secret values appropriately when switching between sandbox and live_
 
