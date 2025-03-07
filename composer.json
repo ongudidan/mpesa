@@ -1,0 +1,20 @@
+{
+  "name": "ongudidan/mpesa",
+  "description": "This is a daraja API package used to connect all the services offered like C2B, B2C, B2B etc...",
+  "type": "library",
+  "autoload": {
+    "psr-4": {
+      "Mpesa\\": "src/"
+    }
+  },
+  "authors": [
+    {
+      "name": "ongudidan",
+      "email": "ongudidan@gmail.com"
+    }
+  ],
+  "minimum-stability": "stable",
+  "require": {
+    "vlucas/phpdotenv": "*"
+  }
+}
