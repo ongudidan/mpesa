@@ -79,7 +79,7 @@ This is used to initiate online payment on behalf of a customer.
 
 `$mpesa= new \Mpesa\Mpesa();`
 
-`$stkPushSimulation=$mpesa->STKPushSimulation($BusinessShortCode, $LipaNaMpesaPasskey, $TransactionType, $Amount, $PartyA, $PartyB, $PhoneNumber, $CallBackURL, $AccountReference, $TransactionDesc, $Remarks);`
+`$stkPushSimulation = $mpesa->STKPushSimulation($TransactionType, $Amount, $PartyA, $PartyB, $PhoneNumber, $CallBackURL, $AccountReference, $TransactionDesc, $Remarks);`
 
 
 
@@ -89,7 +89,7 @@ This is used to initiate online payment on behalf of a customer.
  
 `$mpesa= new \Mpesa\Mpesa();`
 
-`$STKPushRequestStatus=$mpesa->STKPushQuery($checkoutRequestID, $businessShortCode, $BusinessShortCode, $LipaNaMpesaPasskey);`
+`$STKPushRequestStatus = $mpesa->STKPushQuery($checkoutRequestID);`
 
 
 

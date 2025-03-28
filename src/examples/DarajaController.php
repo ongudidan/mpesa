@@ -55,8 +55,7 @@ class DarajaController extends Controller
      */
     public function actionInitiate()
     {
-        $BusinessShortCode = $_SERVER['MPESA_BUSINESS_SHORTCODE'];
-        $LipaNaMpesaPasskey = $_SERVER['LIPA_NA_MPESA_PASSKEY'];
+
         $TransactionType = 'CustomerPayBillOnline';
         $Amount = 1;
         $PartyA = '254768540720';
@@ -69,7 +68,7 @@ class DarajaController extends Controller
 
         $mpesa = new Mpesa();
 
-        $stkPushSimulation = $mpesa->STKPushSimulation($BusinessShortCode, $LipaNaMpesaPasskey, $TransactionType, $Amount, $PartyA, $PartyB, $PhoneNumber, $CallBackURL, $AccountReference, $TransactionDesc, $Remarks);
+        $stkPushSimulation = $mpesa->STKPushSimulation($TransactionType, $Amount, $PartyA, $PartyB, $PhoneNumber, $CallBackURL, $AccountReference, $TransactionDesc, $Remarks);
 
         // Decode response as an object (default behavior of json_decode)
         $stk_response = json_decode($stkPushSimulation);
@@ -104,14 +103,10 @@ class DarajaController extends Controller
     public function actionStatus()
     {
         $checkoutRequestID = 'ws_CO_07032025173300577768540720';
-        $businessShortCode = $_SERVER['MPESA_BUSINESS_SHORTCODE'];
-        $BusinessShortCode = $_SERVER['MPESA_BUSINESS_SHORTCODE'];
-        $LipaNaMpesaPasskey = $_SERVER['LIPA_NA_MPESA_PASSKEY'];
-
 
         $mpesa = new Mpesa();
 
-        $STKPushRequestStatus = $mpesa->STKPushQuery($checkoutRequestID, $businessShortCode, $BusinessShortCode, $LipaNaMpesaPasskey);
+        $STKPushRequestStatus = $mpesa->STKPushQuery($checkoutRequestID);
 
         echo $STKPushRequestStatus;
     }
