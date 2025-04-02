@@ -17,6 +17,55 @@ class Mpesa
 {
 
     /**
+     * This function is used to generate the security credential
+     * @param $initiatorPassword | The password of the initiator
+     * @param $certificatePath | The path to the certificate file, relative to the package directory
+     * @return string
+     */
+    public static function generateSecurityCredential()
+    {
+        try {
+            $environment = $_SERVER['MPESA_ENV'];
+        } catch (\Throwable $th) {
+            $environment = $_SERVER['MPESA_ENV'];
+        }
+
+        // Get the initiator password from environment variables
+        try {
+            $initiatorPassword = $_SERVER['MPESA_INITIATOR_PASSWORD'];
+        } catch (\Throwable $th) {
+            $initiatorPassword = $_SERVER['MPESA_INITIATOR_PASSWORD'];
+        }
+        if (!isset($initiatorPassword)) {
+            die("please declare the initiator password as defined in the documentation");
+        }
+       
+        // Use the current directory to get the certificate path
+        if ($environment == "live") {
+            $certificatePath = rtrim(__DIR__, '/') . '/ProductionCertificate.cer'; // Ensure trailing slash
+        } elseif ($environment == "sandbox") {
+            $certificatePath = rtrim(__DIR__, '/') . '/SandboxCertificate.cer'; // Ensure trailing slash
+        } else {
+            die("invalid application status");
+        }
+
+        // $certificatePath = rtrim(__DIR__, '/') . '/ProductionCertificate.cer'; // Ensure trailing slash
+
+        if (!file_exists($certificatePath)) {
+            die("Certificate file not found at: $certificatePath");
+        }
+
+
+        // Encrypt the password using the certificate
+        openssl_public_encrypt($initiatorPassword, $encrypted, file_get_contents($certificatePath), OPENSSL_PKCS1_PADDING);
+
+        // Return the base64-encoded encrypted password
+        return base64_encode($encrypted);
+    }
+
+
+
+    /**
      * This is used to generate tokens for the live environment
      * @return mixed
      */
@@ -45,6 +94,9 @@ class Mpesa
         curl_setopt($curl, CURLOPT_SSL_VERIFYPEER, false);
 
         $curl_response = curl_exec($curl);
+
+        // print_r($curl_response);
+        // exit;
 
         return json_decode($curl_response)->access_token;
     }
@@ -218,7 +270,7 @@ class Mpesa
      * @param $BillRefNumber | 	Bill Reference Number (Optional).
      * @return mixed|string
      */
-    public  static  function  c2b($ShortCode, $CommandID, $Amount, $Msisdn, $BillRefNumber)
+    public  static  function  c2b($CommandID, $Amount, $Msisdn, $BillRefNumber)
     {
 
         try {
@@ -244,11 +296,11 @@ class Mpesa
         curl_setopt($curl, CURLOPT_HTTPHEADER, array('Content-Type:application/json', 'Authorization:Bearer ' . $token));
 
         $curl_post_data = array(
-            'ShortCode' => $ShortCode,
+            'ShortCode' => $_SERVER['MPESA_BUSINESS_SHORTCODE'],
             'CommandID' => $CommandID,
             'Amount' => $Amount,
             'Msisdn' => $Msisdn,
-            'BillRefNumber' => $BillRefNumber
+            'BillRefNumber' => $BillRefNumber,
         );
 
         $data_string = json_encode($curl_post_data);
@@ -274,8 +326,34 @@ class Mpesa
      * @param $ResultURL | 	The path that stores information of transaction
      * @return mixed|string
      */
-    public static function accountBalance($CommandID, $Initiator, $SecurityCredential, $PartyA, $IdentifierType, $Remarks, $QueueTimeOutURL, $ResultURL)
+    public static function accountBalance($IdentifierType, $QueueTimeOutURL, $ResultURL)
     {
+        // Get the security credential from environment variables
+        $SecurityCredential = self::generateSecurityCredential();
+
+        $CommandID = 'AccountBalance';
+
+        // Get the initiator name from environment variables
+        try {
+            $Initiator = $_SERVER['MPESA_INITIATOR'];
+        } catch (\Throwable $th) {
+            $Initiator = $_SERVER['MPESA_INITIATOR'];
+        }
+        if (!isset($Initiator)) {
+            die("please declare the initiator name as defined in the documentation");
+        }
+
+        // Get the party A from environment variables
+        try {
+            $PartyA = $_SERVER['MPESA_BUSINESS_SHORTCODE'];
+        } catch (\Throwable $th) {
+            $PartyA = $_SERVER['MPESA_BUSINESS_SHORTCODE'];
+        }
+        if (!isset($PartyA)) {
+            die("please declare the party A as defined in the documentation");
+        }
+
+        $Remarks = 'Account Balance';
 
         try {
             $environment = $_SERVER['MPESA_ENV'];
@@ -334,8 +412,36 @@ class Mpesa
      * @param $Occasion | 	Optional Parameter
      * @return mixed|string
      */
-    public function transactionStatus($Initiator, $SecurityCredential, $CommandID, $TransactionID, $PartyA, $IdentifierType, $ResultURL, $QueueTimeOutURL, $Remarks, $Occasion)
+    public function transactionStatus($TransactionID, $IdentifierType, $ResultURL, $QueueTimeOutURL)
     {
+        // Get the security credential from environment variables
+        $SecurityCredential = self::generateSecurityCredential();
+
+        $CommandID = 'TransactionStatusQuery';
+
+        // Get the initiator name from environment variables
+        try {
+            $Initiator = $_SERVER['MPESA_INITIATOR'];
+        } catch (\Throwable $th) {
+            $Initiator = $_SERVER['MPESA_INITIATOR'];
+        }
+        if (!isset($Initiator)) {
+            die("please declare the initiator name as defined in the documentation");
+        }
+
+        // Get the party A from environment variables
+        try {
+            $PartyA = $_SERVER['MPESA_BUSINESS_SHORTCODE'];
+        } catch (\Throwable $th) {
+            $PartyA = $_SERVER['MPESA_BUSINESS_SHORTCODE'];
+        }
+        if (!isset($PartyA)) {
+            die("please declare the party A as defined in the documentation");
+        }
+
+        $Remarks = 'Transaction Status';
+        $Occasion = 'Transaction Status';
+
 
         try {
             $environment = $_SERVER['MPESA_ENV'];
@@ -534,7 +640,7 @@ class Mpesa
         }
 
         if ($environment == "live") {
-            $url = 'https://api.safaricom.co.ke/mpesa/stkpushquery/v1/query';
+            $url = 'https://api.safaricom.co.ke/mpesa/stkpushquery/v2/query';
             $token = self::generateLiveToken();
         } elseif ($environment == "sandbox") {
             $url = 'https://sandbox.safaricom.co.ke/mpesa/stkpushquery/v1/query';
@@ -603,5 +709,64 @@ class Mpesa
     {
         $callbackJSONData = file_get_contents('php://input');
         return $callbackJSONData;
+    }
+
+    /**
+     * Use this function to register a URL for C2B transactions
+     * @param $ConfirmationURL | The URL to which the confirmation message will be sent.
+     * @param $ValidationURL | The URL to which the validation message will be sent.
+     * @return mixed|string
+     */
+    public function registerUrl($ResponseType, $ConfirmationURL, $ValidationURL)
+    {
+        try {
+            $environment = $_SERVER['MPESA_ENV'];
+        } catch (\Throwable $th) {
+            $environment = $_SERVER['MPESA_ENV'];
+        }
+
+        if ($environment == "live") {
+            $url = 'https://api.safaricom.co.ke/mpesa/c2b/v2/registerurl';
+            $token = self::generateLiveToken();
+        } elseif ($environment == "sandbox") {
+            $url = 'https://sandbox.safaricom.co.ke/mpesa/c2b/v1/registerurl';
+            $token = self::generateSandBoxToken();
+        } else {
+            return json_encode(["Message" => "invalid application status"]);
+        }
+
+        // Get the business shortcode from environment variables
+        try {
+            $ShortCode = $_SERVER['MPESA_BUSINESS_SHORTCODE'];
+        } catch (\Throwable $th) {
+            $ShortCode = $_SERVER['MPESA_BUSINESS_SHORTCODE'];
+        }
+        if (!isset($ShortCode)) {
+            die("please declare the business shortcode as defined in the documentation");
+        }
+
+
+        $curl = curl_init();
+        curl_setopt($curl, CURLOPT_URL, $url);
+        curl_setopt($curl, CURLOPT_HTTPHEADER, array('Content-Type:application/json', 'Authorization:Bearer ' . $token)); //setting custom header
+
+
+        $curl_post_data = array(
+            'ShortCode' => $_SERVER['MPESA_BUSINESS_SHORTCODE'],
+            'ResponseType' => $ResponseType,
+            'ConfirmationURL' => $ConfirmationURL,
+            'ValidationURL' => $ValidationURL
+        );
+
+        $data_string = json_encode($curl_post_data);
+
+        curl_setopt($curl, CURLOPT_RETURNTRANSFER, true);
+        curl_setopt($curl, CURLOPT_POST, true);
+        curl_setopt($curl, CURLOPT_POSTFIELDS, $data_string);
+        curl_setopt($curl, CURLOPT_HEADER, false);
+        $curl_response = curl_exec($curl);
+
+
+        return $curl_response;
     }
 }

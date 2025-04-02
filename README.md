@@ -10,6 +10,8 @@ This package seeks to help php developers implement the various Mpesa APIs witho
  **Configuration**<br>
  At your project root, create a yii2.cfg file and in it set the consumer key and consumer secret as follows   
  `MPESA_CONSUMER_KEY= "consumer key"` <br>
+ `MPESA_INITIATOR= "username for the user with the assigned permissions"` <br>
+ `MPESA_INITIATOR_PASSWORD= "password for that user"` <br>
  `MPESA_CONSUMER_SECRET="consumer secret"`<br>
  `MPESA_BUSINESS_SHORTCODE=" enter business shortcode eg  174379"`<br>
  `LIPA_NA_MPESA_PASSKEY="enter lipa na mpesa passkey eg bfb279f9aa9bdbcf158e97dd71a467cd2e0c893059b10f78e6b72ada1ed2c919"`<br>
@@ -33,11 +35,11 @@ This package seeks to help php developers implement the various Mpesa APIs witho
 
 **Account Balance Request**
  
-This is used to enquire the balance on an M-Pesa BuyGoods (Till Number)
+This is used to enquire the balance on an M-Pesa BuyGoods (Till Number or Pay Bill)
 
 `$mpesa= new \Mpesa\Mpesa();`
 
-`$balanceInquiry=$mpesa->accountBalance($CommandID, $Initiator, $SecurityCredential, $PartyA, $IdentifierType, $Remarks, $QueueTimeOutURL, $ResultURL);`
+`$balanceInquiry=$mpesa->accountBalance($IdentifierType, $QueueTimeOutURL, $ResultURL);`
 
 
 
@@ -46,7 +48,7 @@ This is used to check the status of transaction.
 
 `$mpesa= new \Mpesa\Mpesa();`
 
-`$trasactionStatus=$mpesa->transactionStatus($Initiator, $SecurityCredential, $CommandID, $TransactionID, $PartyA, $IdentifierType, $ResultURL, $QueueTimeOutURL, $Remarks, $Occasion);`
+`$trasactionStatus=$mpesa->transactionStatus($TransactionID, $IdentifierType, $ResultURL, $QueueTimeOutURL);`
 
 
 
@@ -67,7 +69,7 @@ This is used to Simulate transfer of funds between a customer and business.
 
 `$mpesa= new \Mpesa\Mpesa();`
 
-`$b2bTransaction=$mpesa->c2b($ShortCode, $CommandID, $Amount, $Msisdn, $BillRefNumber );`
+`$c2bTransaction=$mpesa->c2b($ShortCode, $CommandID, $Amount, $Msisdn, $BillRefNumber );`
 
 _Also important to note is that you should have registered validation and confirmation urls where the callback responses will be sent._
 
